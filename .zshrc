@@ -54,6 +54,7 @@ plugins=(git)
 # User configuration
 
 export PATH="/Users/InJung/.rbenv/shims:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+export PATH="/Users/InJung/Library/Android/sdk/platform-tools":$PATH
 # export MANPATH="/usr/local/man:$MANPATH"
 
 source $ZSH/oh-my-zsh.sh
@@ -82,3 +83,23 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
+# Python venv
+export WORKON_HOME=~/.python_virtual_envs
+source /usr/local/bin/virtualenvwrapper.sh
+
+# Ruby
+alias irb="irb --noreadline"
+alias rspec="nocorrect bundle exec rspec"
+
+# Pedaling
+alias p="ssh deploy@1.255.54.165 -p 2222"
+alias ws="ssh root@1.255.54.165 -p 2323"
+alias gc="git checkout"
+alias gp="git pull"
+alias gm="git merge"
+alias pd="cd ~/GitHub/pedaling"
+alias hr="cd ~/GitHub/pedaling/haru-rails"
+alias ph="cd ~/GitHub/pedaling/pedaling-home"
+alias pa="cd ~/GitHub/pedaling/pedaling-app"
+alias ss="foreman start -f Procfile.local"
