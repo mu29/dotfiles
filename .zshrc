@@ -5,6 +5,9 @@ elif [[ -x /usr/local/bin/brew ]]; then
   eval "$(/usr/local/bin/brew shellenv)"
 fi
 
+# Keep user-local commands such as codex available without shadowing Homebrew.
+[[ -d "$HOME/.local/bin" && ":$PATH:" != *":$HOME/.local/bin:"* ]] && path+=("$HOME/.local/bin")
+
 # Enable mise-managed tools in each shell.
 command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
 
