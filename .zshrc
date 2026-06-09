@@ -28,6 +28,21 @@ alias ls="ls -G"
 autoload -Uz compinit
 compinit
 
+# Enable an interactive completion menu like oh-my-zsh's default behavior.
+zmodload zsh/complist
+zstyle ':completion:*' menu select
+bindkey -M menuselect "${terminfo[kcuu1]}" up-line-or-history
+bindkey -M menuselect "${terminfo[kcud1]}" down-line-or-history
+
+# Search command history by the text already typed at the prompt.
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey "${terminfo[kcuu1]}" up-line-or-beginning-search
+bindkey "${terminfo[kcud1]}" down-line-or-beginning-search
+bindkey "^[[A" up-line-or-beginning-search
+bindkey "^[[B" down-line-or-beginning-search
+
 # Run git prompt reads without taking optional repository locks.
 _git_prompt_git() {
   GIT_OPTIONAL_LOCKS=0 command git "$@"
