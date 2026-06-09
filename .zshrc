@@ -133,6 +133,10 @@ alias gb="git branch"
 alias gcp="git cherry-pick"
 
 # Utils
+export PAGER="less"
+export GIT_PAGER="less"
+export LESS="-R --mouse --wheel-lines=4"
+
 alias ipcopy="ipconfig getifaddr en1 | pbcopy"
 
 [[ -r "$HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh" ]] && \
