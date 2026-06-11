@@ -135,7 +135,7 @@ alias gcp="git cherry-pick"
 # Utils
 export PAGER="less"
 export GIT_PAGER="less"
-export LESS="-R --mouse --wheel-lines=4"
+export LESS="-R --wheel-lines=2"
 
 alias ipcopy="ipconfig getifaddr en1 | pbcopy"
 
