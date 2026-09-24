@@ -5,6 +5,9 @@ elif [[ -x /usr/local/bin/brew ]]; then
   eval "$(/usr/local/bin/brew shellenv)"
 fi
 
+# Local binaries
+export PATH="$HOME/.local/bin:$PATH"
+
 # Keep user-local commands such as codex available without shadowing Homebrew.
 [[ -d "$HOME/.local/bin" && ":$PATH:" != *":$HOME/.local/bin:"* ]] && path+=("$HOME/.local/bin")
 
@@ -19,6 +22,8 @@ HISTFILE="$HOME/.zsh_history"
 
 autoload -Uz colors
 colors
+
+FPATH="$HOMEBREW_PREFIX/share/zsh-completions:$FPATH"
 
 # Directory/file colors for BSD ls on macOS.
 export CLICOLOR=1
@@ -139,7 +144,13 @@ export LESS="-R --wheel-lines=2"
 
 alias ipcopy="ipconfig getifaddr en1 | pbcopy"
 
-[[ -r "$HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh" ]] && \
-  source "$HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh"
-[[ -r "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]] && \
-  source "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+# pnpm
+export PNPM_HOME='/Users/friday/Library/pnpm'
+case ":$PATH:" in
+  *":$PNPM_HOME/bin:"*) ;;
+  *) export PATH="$PNPM_HOME/bin:$PATH" ;;
+esac
+# pnpm end
+
+source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+source "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
