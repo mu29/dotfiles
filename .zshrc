@@ -23,7 +23,10 @@ HISTFILE="$HOME/.zsh_history"
 autoload -Uz colors
 colors
 
-FPATH="$HOMEBREW_PREFIX/share/zsh-completions:$FPATH"
+if [[ -n "$HOMEBREW_PREFIX" &&
+      -d "$HOMEBREW_PREFIX/share/zsh-completions" ]]; then
+  fpath=("$HOMEBREW_PREFIX/share/zsh-completions" $fpath)
+fi
 
 # Directory/file colors for BSD ls on macOS.
 export CLICOLOR=1
@@ -31,7 +34,7 @@ export LSCOLORS="Gxfxcxdxbxegedabagacad"
 alias ls="ls -G"
 
 autoload -Uz compinit
-compinit
+compinit -i
 
 # Enable an interactive completion menu like oh-my-zsh's default behavior.
 zmodload zsh/complist
@@ -144,5 +147,10 @@ export LESS="-R --wheel-lines=2"
 
 alias ipcopy="ipconfig getifaddr en1 | pbcopy"
 
-source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
-source "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+if [[ -n "$HOMEBREW_PREFIX" ]]; then
+  [[ -r "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]] &&
+    source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+
+  [[ -r "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]] &&
+    source "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+fi
