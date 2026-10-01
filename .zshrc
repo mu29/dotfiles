@@ -1,28 +1,4 @@
-# brew
-if [[ -x /opt/homebrew/bin/brew ]]; then
-  eval "$(/opt/homebrew/bin/brew shellenv)"
-elif [[ -x /usr/local/bin/brew ]]; then
-  eval "$(/usr/local/bin/brew shellenv)"
-fi
-
-# Local binaries
-export PATH="$HOME/.local/bin:$PATH"
-
-# Keep user-local commands such as codex available without shadowing Homebrew.
-[[ -d "$HOME/.local/bin" && ":$PATH:" != *":$HOME/.local/bin:"* ]] && path+=("$HOME/.local/bin")
-
-# Enable mise-managed tools in each shell.
-command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
-
-setopt PROMPT_SUBST
-setopt SHARE_HISTORY HIST_IGNORE_DUPS
-
-SAVEHIST=50000
-HISTFILE="$HOME/.zsh_history"
-
-autoload -Uz colors
-colors
-
+typeset -U fpath FPATH
 if [[ -n "$HOMEBREW_PREFIX" &&
       -d "$HOMEBREW_PREFIX/share/zsh-completions" ]]; then
   fpath=("$HOMEBREW_PREFIX/share/zsh-completions" $fpath)
@@ -33,6 +9,7 @@ export CLICOLOR=1
 export LSCOLORS="Gxfxcxdxbxegedabagacad"
 alias ls="ls -G"
 
+# Skip insecure completion paths without prompting.
 autoload -Uz compinit
 compinit -i
 
@@ -147,6 +124,7 @@ export LESS="-R --wheel-lines=2"
 
 alias ipcopy="ipconfig getifaddr en1 | pbcopy"
 
+# Load only installed plugins; syntax highlighting must remain last.
 if [[ -n "$HOMEBREW_PREFIX" ]]; then
   [[ -r "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]] &&
     source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
