@@ -2,81 +2,96 @@
 set -euo pipefail
 
 DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ZSH_PLUGIN_DIR="${ZSH_PLUGIN_DIR:-$HOME/.zsh}"
+
+if [[ "$(uname -s)" != Darwin ]]; then
+  echo "This installer is for macOS." >&2
+  exit 1
+fi
+
+if [[ ! -f "$DOTFILES/.zshrc" ]]; then
+  echo "Missing $DOTFILES/.zshrc; keep it next to install.sh." >&2
+  exit 1
+fi
+/bin/zsh -n "$DOTFILES/.zshrc"
+
+# Use paths relative to the current user, including after a machine migration.
+export PNPM_HOME="$HOME/Library/pnpm"
+export PATH="$HOME/.local/bin:$PNPM_HOME:$PNPM_HOME/bin:$PATH"
 
 install_homebrew() {
-  if command -v brew >/dev/null 2>&1; then
+  if command -v brew >/dev/null 2>&1 ||
+     [[ -x /opt/homebrew/bin/brew || -x /usr/local/bin/brew ]]; then
     return
   fi
 
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  local installer
+  installer="$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  /bin/bash -c "$installer"
 }
 
 load_homebrew() {
-  if [[ -x /opt/homebrew/bin/brew ]]; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
+  local brew_bin shellenv
+  if command -v brew >/dev/null 2>&1; then
+    brew_bin="$(command -v brew)"
+  elif [[ -x /opt/homebrew/bin/brew ]]; then
+    brew_bin=/opt/homebrew/bin/brew
   elif [[ -x /usr/local/bin/brew ]]; then
-    eval "$(/usr/local/bin/brew shellenv)"
-  elif command -v brew >/dev/null 2>&1; then
-    eval "$(brew shellenv)"
+    brew_bin=/usr/local/bin/brew
   else
     echo "Homebrew was not found after installation." >&2
     exit 1
   fi
-}
 
-ensure_brew_in_zprofile() {
-  local zprofile="$HOME/.zprofile"
-  local brew_prefix
-  local shellenv_line
-
-  brew_prefix="$(brew --prefix)"
-  shellenv_line="eval \"\$($brew_prefix/bin/brew shellenv)\""
-
-  touch "$zprofile"
-  grep -Fxq "$shellenv_line" "$zprofile" || printf '\n%s\n' "$shellenv_line" >> "$zprofile"
-}
-
-install_mise() {
-  if brew list mise >/dev/null 2>&1; then
-    return
-  fi
-
-  brew install mise
-}
-
-clone_or_update() {
-  local repo="$1"
-  local dest="$2"
-
-  if [[ -d "$dest/.git" ]]; then
-    git -C "$dest" pull --ff-only
-  elif [[ -e "$dest" ]]; then
-    echo "Skipping $dest; it already exists and is not a git checkout." >&2
-  else
-    git clone "$repo" "$dest"
-  fi
+  shellenv="$("$brew_bin" shellenv)"
+  eval "$shellenv"
 }
 
 install_zsh_plugins() {
-  mkdir -p "$ZSH_PLUGIN_DIR"
+  local formula
+  for formula in zsh-autosuggestions zsh-syntax-highlighting zsh-completions; do
+    if ! brew list --formula "$formula" >/dev/null 2>&1; then
+      brew install "$formula"
+    fi
+  done
+}
 
-  clone_or_update \
-    https://github.com/zsh-users/zsh-autosuggestions \
-    "$ZSH_PLUGIN_DIR/zsh-autosuggestions"
-
-  clone_or_update \
-    https://github.com/zsh-users/zsh-syntax-highlighting.git \
-    "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting"
+install_mise() {
+  if ! command -v mise >/dev/null 2>&1; then
+    curl -fsSL https://mise.run |
+      env MISE_INSTALL_PATH="$HOME/.local/bin/mise" sh
+  fi
+  mise --version
 }
 
 copy_dotfiles() {
-  cp -f "$DOTFILES/.zshrc" "$HOME/.zshrc"
+  local target="$HOME/.zshrc"
+  local backup
+  if [[ -e "$target" ]] && cmp -s "$DOTFILES/.zshrc" "$target"; then
+    return
+  fi
+  if [[ -e "$target" ]]; then
+    backup="$(mktemp "$HOME/.zshrc.backup.XXXXXX")"
+    cp -p "$target" "$backup"
+    printf 'Backed up .zshrc to %s\n' "$backup"
+  fi
+  cp -f "$DOTFILES/.zshrc" "$target"
+}
+
+install_pnpm() {
+  if ! command -v pnpm >/dev/null 2>&1; then
+    curl -fsSL https://get.pnpm.io/install.sh |
+      env SHELL=/bin/zsh PNPM_HOME="$PNPM_HOME" sh -
+  fi
+  pnpm --version
 }
 
 install_homebrew
 load_homebrew
-ensure_brew_in_zprofile
-install_mise
 install_zsh_plugins
+install_mise
+
+# pnpm setup may append PATH configuration; copy the dotfile first.
 copy_dotfiles
+install_pnpm
+
+printf '\nInstallation complete. Open a new terminal, or run: exec zsh\n'
