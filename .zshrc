@@ -144,13 +144,5 @@ export LESS="-R --wheel-lines=2"
 
 alias ipcopy="ipconfig getifaddr en1 | pbcopy"
 
-# pnpm
-export PNPM_HOME='/Users/friday/Library/pnpm'
-case ":$PATH:" in
-  *":$PNPM_HOME/bin:"*) ;;
-  *) export PATH="$PNPM_HOME/bin:$PATH" ;;
-esac
-# pnpm end
-
 source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 source "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
